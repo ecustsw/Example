@@ -29,4 +29,9 @@
       <Filter>Header File</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="makefile">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

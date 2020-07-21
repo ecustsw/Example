@@ -19,6 +19,9 @@
     <ClInclude Include="CFtpWorker.h" />
     <ClInclude Include="CThreadBase.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="makefile" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1F4A572C-3924-480C-93B6-86054E4664EC}</ProjectGuid>
   </PropertyGroup>
