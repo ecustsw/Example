@@ -20,12 +20,18 @@
     <ClCompile Include="CFtpWorker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CSocket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CThreadBase.h">
       <Filter>Header File</Filter>
     </ClInclude>
     <ClInclude Include="CFtpWorker.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="CSocket.h">
       <Filter>Header File</Filter>
     </ClInclude>
   </ItemGroup>
