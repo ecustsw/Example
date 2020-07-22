@@ -1,10 +1,16 @@
 #include <cstdio>
 #include <exception>
+#include <ctime>
 #include "CFtpWorker.h"
 
 void CFtpWorker::run()
 {
-	printf("do work\n");
+    m_status = ThreadStatus::WORKING;
+    while(m_socket.Valid())
+    {
+        printf("do work\n");
+        sleep(10);
+    }	
 
 	return;
 }

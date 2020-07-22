@@ -10,6 +10,7 @@ void* CThreadBase::ThreadProc(void* attr)
 	int *ret = (int*)malloc(sizeof(int));
 	*ret = 0;
 	CThreadBase* pThis = (CThreadBase*)attr;
+	pThis->m_status = ThreadStatus::WORKING;
 	try
 	{
 		pThis->run();
@@ -20,6 +21,7 @@ void* CThreadBase::ThreadProc(void* attr)
 		*ret = -1;
 		pthread_exit(ret);
 	}
+	pThis->m_status = ThreadStatus::INVALID;
 	printf("thread terminated\n");
 	pthread_exit(ret);
 }	
@@ -30,7 +32,7 @@ bool CThreadBase::start()
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-	//pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);//no need join
 
 	if (pthread_create(&m_threadId, &attr, ThreadProc, this) == 0)
 		ret = true;
