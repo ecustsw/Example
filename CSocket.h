@@ -16,8 +16,11 @@ public:
     int Attach(CSocket& other);
     bool Valid();
     const char* LastError();
-    int isReadyRead(int seconds = 5);
-    int isReadyWrite(int seconds = 5);
+    int isReadyRead(int mseconds = 100);
+    int isReadyWrite(int mseconds = 100);
+
+    virtual int Send(int size,const char *buf);
+    virtual int Recv(int size,char *buf);
     
 protected:
     enum SocketStatus

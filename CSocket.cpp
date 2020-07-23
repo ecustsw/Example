@@ -95,7 +95,7 @@ const char* CSocket::LastError()
     return strerror(errno);
 }
 
-int CSocket::isReadyRead(int seconds)
+int CSocket::isReadyRead(int mseconds)
 {
     fd_set rfds;
     struct timeval tv;
@@ -104,15 +104,15 @@ int CSocket::isReadyRead(int seconds)
     FD_ZERO(&rfds);
     FD_SET(m_socket,&rfds);
 
-    tv.tv_sec = seconds;
-    tv.tv_usec = 0;
+    tv.tv_sec = 0;
+    tv.tv_usec = mseconds * 1000;
 
     retval = select(m_socket + 1, &rfds, NULL, NULL, &tv);
 
     return retval;
 }
 
-int CSocket::isReadyWrite(int seconds)
+int CSocket::isReadyWrite(int mseconds)
 {
     fd_set wfds;
     struct timeval tv;
@@ -121,10 +121,36 @@ int CSocket::isReadyWrite(int seconds)
     FD_ZERO(&wfds);
     FD_SET(m_socket,&wfds);
 
-    tv.tv_sec = seconds;
-    tv.tv_usec = 0;
+    tv.tv_sec = 0;
+    tv.tv_usec = mseconds * 1000;
 
     retval = select(m_socket + 1, NULL, &wfds, NULL, &tv);
 
     return retval;
+}
+
+int CSocket::Send(int size,const char *buf)
+{
+    int sended = 0;
+    while (sended < size)
+    {
+        int ret = send(m_socket,buf + sended,size - sended,0);
+        if (ret < 0)
+            return ret;
+        sended += ret;
+    }
+    return sended;
+}
+
+int CSocket::Recv(int size,char *buf)
+{
+    int recved = 0;
+    while (recved < size)
+    {
+        int ret = recv(m_socket,buf + recved,size - recved,0);
+        if (ret < 0)
+            return ret;
+        recved += ret;
+    }
+    return recved;
 }

@@ -1,5 +1,5 @@
-OBJS=ftp.o CThreadBase.o CFtpWorker.o CSocket.o
-OBJS1=testftp.o CThreadBase.o CFtpWorker.o CSocket.o
+OBJS=ftp.o CThreadBase.o CFtpWorker.o CSocket.o CMessage.o
+OBJS1=testftp.o CThreadBase.o CFtpWorker.o CSocket.o CMessage.o
 CXX=g++
 CXXFLAG=-c -g -std=c++11
 LIBS=-lpthread
