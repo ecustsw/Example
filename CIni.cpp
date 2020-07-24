@@ -162,6 +162,12 @@ int CIni::state(const char *ptr,int pos)
                     return ret;
                 }
             }
+            else if(c == '/' && cc == '/')
+            {
+                m_lastState = m_state;
+                m_state = COMMEMTENDING;
+                ret = pos + 1;//skip next
+            }
             else
             {
                 if(c == '=')
