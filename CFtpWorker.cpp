@@ -54,6 +54,7 @@ void CFtpWorker::run()
             testRequest();
             if (m_lastActiveTime + m_timeInterval < now)
             {
+                printf("close peer for timeout\n");
                 m_socket.Close();
                 break;
             }

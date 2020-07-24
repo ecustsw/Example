@@ -12,6 +12,7 @@
 CIni::CIni()
 {
     m_state = NEW;
+    m_curRow = 0;
 }
 
 CIni::~CIni()
@@ -24,18 +25,20 @@ void CIni::loadIni(const char *file)
     m_fileno = open(file,O_RDONLY);
     if(m_fileno < 0)
     {
-        printf("error when open ini file:%s",strerror(errno));
+        printf("error when open ini file:%s\n",strerror(errno));
         return;
     }
 
-    parseFile();
+    if(parseFile() < 0)
+    {
+        exit(-1);
+    }
 
     close(m_fileno);
 }
 
 int CIni::parseFile()
 {
-    int ret = 0;
     char buf[EACH_LEN] = {0};//size of each read
     int cur = 0;
     while(1)
@@ -43,20 +46,22 @@ int CIni::parseFile()
         if(cur == 0 || cur == EACH_LEN ||buf[cur] == '\0')//read next
         {
             memset(buf,0,sizeof(buf));
-            if((ret = next(buf,EACH_LEN)) < 0)
+            if((cur = next(buf,EACH_LEN)) < 0)
             {
-                printf("error when read ini file:%s",strerror(errno));
+                printf("error when read ini file:%s\n",strerror(errno));
                 break;
             }
             if(buf[0] == '\0')//end of file
                 break;
+            cur = 0;//begin
         }
+        while(buf[cur] > 0x7f) {cur++;} //filter cn
         if((cur = state(buf,cur)) < 0)//may look forward
             break;
         cur++;
     }
 
-    return ret;
+    return cur;
 }
 
 int CIni::state(const char *ptr,int pos)
@@ -79,6 +84,12 @@ int CIni::state(const char *ptr,int pos)
         else
         {
             m_state = RECEIVERIGHTSQUARE;
+            if(m_lastV.size() > 0)//??
+            {
+                ret = -1;
+                printf("illeagle value %s-%d|near config file row %d\n",__FILE__,__LINE__,m_curRow);
+                return ret;
+            }
             m_lastV.clear();
         }
     }
@@ -101,7 +112,7 @@ int CIni::state(const char *ptr,int pos)
                 else if((cc = ptr[pos + 1]) == '\0')//end of file
                 {
                     ret = -1;
-                    printf("parse error unexpected end%s-%d",__FILE__,__LINE__);
+                    printf("parse error unexpected end%s-%d|near config file row %d\n",__FILE__,__LINE__,m_curRow);
                     return ret;
                 }
                 else
@@ -115,18 +126,20 @@ int CIni::state(const char *ptr,int pos)
                     else//begin of file is not comment,not okey!
                     {
                         ret = -1;
-                        printf("parse error %s-%d",__FILE__,__LINE__);
+                        printf("parse error %s-%d|near config file row %d\n",__FILE__,__LINE__,m_curRow);
                     }
                 }
             }
             else if(isblank(c))
             {
                 //skip it
+                if(c == '\n')
+                    m_curRow++;
             }
             else
             {
                 ret = -1;
-                printf("parse error %s-%d",__FILE__,__LINE__);
+                printf("parse error,value must in one section %s-%d|near config file row %d\n",__FILE__,__LINE__,m_curRow);
             }
             break;
         case RECEIVELEFTSQUARE :
@@ -145,7 +158,7 @@ int CIni::state(const char *ptr,int pos)
             else
             {
                 ret = -1;
-                printf("parse error %s-%d",__FILE__,__LINE__);
+                printf("parse error %s-%d|near config file row %d\n",__FILE__,__LINE__,m_curRow);
             }
             break;
         case RECEIVERIGHTSQUARE :
@@ -158,7 +171,7 @@ int CIni::state(const char *ptr,int pos)
                 if(m_lastV.size() > 0)
                 {
                     ret = -1;
-                    printf("parse error,incomplete key %s-%d",__FILE__,__LINE__);
+                    printf("parse error,incomplete key %s-%d|near config file row %d\n",__FILE__,__LINE__,m_curRow);
                     return ret;
                 }
             }
@@ -180,14 +193,18 @@ int CIni::state(const char *ptr,int pos)
                 else if(c == '\n')
                 {
                     if(m_lastV.size() == 0)
+                    {
+                        m_curRow++;
                         break;
+                    }
 
                     ret = -1;
-                    printf("parse error,no allowed new line %s-%d",__FILE__,__LINE__);
+                    printf("parse error,no allowed new line %s-%d|near config file row %d\n",__FILE__,__LINE__,m_curRow);
                 }
                 else if(isspace(c))
                 {
-
+                    if(c == '\n')
+                        m_curRow++;
                 }
                 else
                 {
@@ -211,7 +228,10 @@ int CIni::state(const char *ptr,int pos)
                 if(c == '\n' || (c == '/' && cc == '/'))//which state to go?
                 {
                     if(c == '\n')
+                    {
+                        m_curRow++;
                         m_state = VALUEEND;//next loop to decide which state to go
+                    }
                     else
                         m_state =  COMMEMTENDING;
 
@@ -220,7 +240,8 @@ int CIni::state(const char *ptr,int pos)
                 }
                 else if(isspace(c)) 
                 {
-
+                    if(c == '\n')
+                        m_curRow++;
                 }
                 else
                 {
@@ -231,6 +252,7 @@ int CIni::state(const char *ptr,int pos)
         case COMMEMTENDING :
             if(c == '\n')
             {
+                m_curRow++;
                 m_state = COMMEMTENDED;
             }
             break;

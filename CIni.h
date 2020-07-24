@@ -45,5 +45,7 @@ private:
     int m_fileno;
     ParseState m_state;
     ParseState m_lastState;//for comment bak
+
+    int m_curRow;
 };
 #endif
