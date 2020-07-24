@@ -37,6 +37,7 @@ void CFtpWorker::processMsg()
 void CFtpWorker::run()
 {
     m_status = ThreadStatus::WORKING;
+    m_lastActiveTime = time(NULL);
     while(m_socket.Valid())
     {
         time_t now = time(NULL);

@@ -3,15 +3,22 @@
 #include <cstring>
 #include "CSocket.h"
 #include "CFtpWorker.h"
+#include "CIni.h"
 
 int main(int argc,char *argv[])
 {
     CFtpWorker worker;
     int ret = 0;
     CSocket listenSocket;
-    const char *ip = "127.0.0.1";
-    short port = 9100;
+    CIni ini;
+    char ip[32] = {0};
+    char tmp[32] = {0};
+    short port = -1;
+    ini.loadIni("config.ini");
     listenSocket.Create(AF_INET,SOCK_STREAM);
+    ini.Get("COMMON","ip",ip);
+    ini.Get("COMMON","port",tmp);
+    port = atoi(tmp);
     if(listenSocket.Listen(ip,port) != 0)
     {
         printf("server socket listen error:%s\n",listenSocket.LastError());
@@ -27,7 +34,6 @@ int main(int argc,char *argv[])
         }
         else if(ret == 0)
         {
-            printf("no link\n");
             continue;
         }
         if((ret = listenSocket.Accept(tmpSocket)) < 0)
